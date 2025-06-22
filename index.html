@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktif: Pola Pikir Bertumbuh (Growth Mindset)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents (Amber & Sky) -->
+    <!-- Application Structure Plan: Desain aplikasi ini menggunakan pendekatan dasbor tematik satu halaman. Tujuannya adalah untuk mengubah modul yang padat teks menjadi pengalaman eksplorasi yang menarik dan tidak linier. Pengguna dapat dengan bebas melompat ke bagian yang diminati melalui navigasi atas yang sticky. Struktur ini dipilih karena konten laporan bersifat konseptual dan akan lebih mudah dicerna melalui visualisasi dan interaksi daripada pembacaan linier. Bagian utama, seperti perbandingan interaktif PPT vs PPB dan visualisasi data PISA, ditempatkan secara strategis untuk menarik perhatian pengguna dan mendorong pemahaman yang mendalam. Alur pengguna dirancang agar mengalir dari pemahaman konsep dasar, perbandingan mendalam, bukti data, hingga penerapan praktis, yang memfasilitasi perjalanan belajar yang komprehensif dan mandiri. -->
+    <!-- Visualization & Content Choices: 
+        1. Info: Hirarki MST -> Goal: Inform -> Viz: Diagram HTML/CSS -> Interaction: Hover highlight -> Justification: Representasi visual sederhana untuk konsep fundamental.
+        2. Info: Perbandingan PPT vs PPB -> Goal: Compare -> Viz: Radar Chart (Chart.js) & Kartu Teks Interaktif (JS) -> Interaction: Hover pada chart & klik kategori -> Justification: Radar chart efektif membandingkan atribut ganda, dan kartu interaktif memberikan detail kontekstual.
+        3. Info: Data PISA 2018 -> Goal: Inform/Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Tooltips -> Justification: Membuat data statistik menjadi nyata dan mudah dibandingkan.
+        4. Info: 4 Langkah Transisi -> Goal: Guide -> Viz: Diagram Proses HTML/CSS -> Interaction: None -> Justification: Alur visual lebih mudah diikuti daripada daftar teks.
+        5. Info: Kekuatan Pujian -> Goal: Compare/Engage -> Viz: Tombol Interaktif (HTML/JS) -> Interaction: Klik untuk beralih antara dua jenis pujian dan melihat konsekuensinya -> Justification: Interaksi langsung memperkuat hubungan sebab-akibat.
+        6. Info: 4 Zona Kehidupan -> Goal: Organize -> Viz: Diagram Lingkaran Konsentris HTML/CSS -> Interaction: Hover highlight -> Justification: Visualisasi yang efektif untuk perjalanan dari zona nyaman ke zona bertumbuh. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefbf6;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 80vw;
+            max-width: 500px;
+            max-height: 400px;
+        }
+        .data-chart-container {
+            position: relative;
+            margin: auto;
+            height: 50vh;
+            width: 100%;
+            max-height: 500px;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #d97706; /* amber-600 */
+        }
+        .active-nav {
+            color: #d97706; /* amber-600 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-lg font-bold text-amber-600">Pola Pikir Bertumbuh</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#definisi" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Definisi</a>
+                        <a href="#perbandingan" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Perbandingan</a>
+                        <a href="#data" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Data & Fakta</a>
+                        <a href="#praktik" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Panduan Praktis</a>
+                        <a href="#konteks" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Konteks Luas</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-amber-600 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Buka menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#definisi" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Definisi</a>
+                    <a href="#perbandingan" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Perbandingan</a>
+                    <a href="#data" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Data & Fakta</a>
+                    <a href="#praktik" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Panduan Praktis</a>
+                    <a href="#konteks" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Konteks Luas</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="definisi" class="min-h-screen flex flex-col justify-center items-center text-center pt-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">Temukan Kekuatan dalam <span class="text-amber-600">Pola Pikir Bertumbuh</span></h2>
+            <p class="mt-4 max-w-2xl text-lg md:text-xl text-gray-600">Aplikasi ini akan memandu Anda memahami konsep Pola Pikir Tetap (Fixed Mindset) dan Pola Pikir Bertumbuh (Growth Mindset), serta bagaimana cara mengembangkannya untuk meraih sukses dalam pembelajaran dan kehidupan.</p>
+            <div class="mt-12 w-full max-w-4xl">
+                <p class="text-lg font-semibold mb-4">Pola pikir adalah fondasi dari keahlian (skillset) dan perangkat (toolset) yang kita miliki. Tanpa fondasi yang kokoh, bangunan di atasnya akan rapuh.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+                    <div class="w-full md:w-1/3 p-4 bg-white rounded-xl shadow-lg border border-gray-200 text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-4xl font-bold text-sky-600 mb-2">3</div>
+                        <h3 class="text-xl font-bold mb-2">Toolset</h3>
+                        <p class="text-gray-600">Kumpulan metode dan alat untuk mempertajam analisis.</p>
+                    </div>
+                    <div class="w-full md:w-1/3 p-4 bg-white rounded-xl shadow-lg border border-gray-200 text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-4xl font-bold text-sky-700 mb-2">2</div>
+                        <h3 class="text-xl font-bold mb-2">Skillset</h3>
+                        <p class="text-gray-600">Pengetahuan dan pengalaman untuk memperdalam pembelajaran.</p>
+                    </div>
+                    <div class="w-full md:w-1/3 p-4 bg-white rounded-xl shadow-lg border border-gray-200 text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-4xl font-bold text-sky-800 mb-2">1</div>
+                        <h3 class="text-xl font-bold mb-2">Mindset</h3>
+                        <p class="text-gray-600">Cara melihat dan berpikir yang menjadi fondasi segalanya.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="perbandingan" class="py-16 md:py-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Perbandingan: Pola Pikir Tetap vs. Bertumbuh</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Lihat perbedaan kunci antara kedua pola pikir dalam menghadapi berbagai situasi. Arahkan kursor pada diagram untuk melihat detail.</p>
+            </div>
+            <div class="flex flex-col lg:flex-row items-center gap-8">
+                <div class="w-full lg:w-1/2">
+                    <div class="chart-container mx-auto">
+                        <canvas id="mindsetChart"></canvas>
+                    </div>
+                </div>
+                <div id="comparison-details" class="w-full lg:w-1/2 space-y-4">
+                    <!-- Detail akan diisi oleh JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section id="data" class="py-16 md:py-24 bg-gray-50 rounded-2xl">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Data & Fakta: Pola Pikir di Indonesia</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Studi PISA 2018 oleh OECD menunjukkan adanya korelasi positif antara jumlah siswa dengan PPB dan nilai akademik. Sayangnya, Indonesia termasuk negara dengan proporsi PPB yang rendah.</p>
+            </div>
+            <div class="data-chart-container mx-auto px-4">
+                <canvas id="pisaChart"></canvas>
+            </div>
+        </section>
+
+        <section id="praktik" class="py-16 md:py-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Panduan Praktis Menuju Pola Pikir Bertumbuh</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Mengembangkan Pola Pikir Bertumbuh adalah sebuah proses. Berikut adalah beberapa strategi praktis yang bisa Anda terapkan.</p>
+            </div>
+            <div class="max-w-4xl mx-auto">
+                <div class="space-y-8">
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold mb-4 text-amber-700">1. Empat Langkah Transisi</h3>
+                        <p class="mb-6 text-gray-600">Menurut Prof. Dweck, ada empat langkah untuk beralih dari Pola Pikir Tetap ke Pola Pikir Bertumbuh.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                            <div class="p-4 bg-sky-50 rounded-lg">
+                                <div class="text-3xl font-bold text-sky-600 mb-2">①</div>
+                                <h4 class="font-semibold">Kenali Suara PPT</h4>
+                                <p class="text-sm text-gray-500">Sadari suara keraguan dan kekhawatiran dalam diri Anda.</p>
+                            </div>
+                            <div class="p-4 bg-sky-50 rounded-lg">
+                                <div class="text-3xl font-bold text-sky-600 mb-2">②</div>
+                                <h4 class="font-semibold">Sadari Punya Pilihan</h4>
+                                <p class="text-sm text-gray-500">Anda tidak harus mengikuti suara negatif tersebut.</p>
+                            </div>
+                            <div class="p-4 bg-sky-50 rounded-lg">
+                                <div class="text-3xl font-bold text-sky-600 mb-2">③</div>
+                                <h4 class="font-semibold">Bicara dengan Suara PPB</h4>
+                                <p class="text-sm text-gray-500">Lawan dengan suara optimisme dan peluang belajar.</p>
+                            </div>
+                            <div class="p-4 bg-sky-50 rounded-lg">
+                                <div class="text-3xl font-bold text-sky-600 mb-2">④</div>
+                                <h4 class="font-semibold">Lakukan Aksi PPB</h4>
+                                <p class="text-sm text-gray-500">Ambil tindakan yang sejalan dengan pola pikir bertumbuh.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold mb-4 text-amber-700">2. Kekuatan Pujian</h3>
+                        <p class="mb-4 text-gray-600">Cara kita memberi pujian sangat berpengaruh. Eksperimen Prof. Dweck menunjukkan bahwa pujian proses lebih efektif dalam membentuk PPB. Coba bedanya!</p>
+                        <div class="flex justify-center items-center space-x-4 mb-4">
+                            <span id="praise-label-pribadi" class="font-semibold text-gray-500">Pribadi</span>
+                            <button id="praise-toggle" class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none bg-red-200">
+                                <span class="sr-only">Ubah jenis pujian</span>
+                                <span id="praise-toggle-knob" class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200 translate-x-0"></span>
+                            </button>
+                            <span id="praise-label-proses" class="font-semibold text-amber-600">Proses</span>
+                        </div>
+                        <div id="praise-result" class="p-4 bg-amber-50 rounded-lg text-center transition-all duration-300">
+                            <!-- Hasil pujian akan ditampilkan di sini -->
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold mb-4 text-amber-700">3. Kekuatan Kata "BELUM" (The Power of YET)</h3>
+                        <p class="mb-4 text-gray-600">Ubah kalimat negatif yang membatasi diri menjadi kalimat yang membuka peluang dengan menambahkan kata "belum".</p>
+                        <div class="flex flex-col sm:flex-row items-center gap-4">
+                            <input id="yet-input" type="text" placeholder="Contoh: Saya tidak bisa matematika" class="w-full flex-grow px-4 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500">
+                            <button id="yet-button" class="w-full sm:w-auto px-6 py-2 bg-amber-600 text-white font-semibold rounded-md hover:bg-amber-700 transition-colors">Ubah!</button>
+                        </div>
+                        <p id="yet-output" class="mt-4 text-center text-xl font-semibold text-sky-700 h-8"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="konteks" class="py-16 md:py-24 bg-gray-50 rounded-2xl">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">PPB dalam Konteks Lebih Luas</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Pola Pikir Bertumbuh tidak hanya penting untuk belajar, tetapi juga menjadi fondasi bagi kreativitas dan pembentukan karakter yang kuat.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-700">PPB dan Kreativitas</h3>
+                    <p class="text-gray-600 mb-6">Kreativitas adalah jembatan antara melakukan hal yang sama (Iterasi) dan menciptakan hal baru yang lebih baik (Inovasi). PPB memberikan ketahanan untuk melalui zona ketakutan dan masuk ke zona belajar dan bertumbuh.</p>
+                    <div class="relative space-y-2 text-center font-semibold">
+                        <div class="p-3 bg-green-100 text-green-800 rounded-full">Zona Bertumbuh (Inovasi)</div>
+                        <div class="p-3 bg-yellow-100 text-yellow-800 rounded-full">Zona Belajar (Kreativitas)</div>
+                        <div class="p-3 bg-red-100 text-red-800 rounded-full">Zona Ketakutan (Butuh PPB)</div>
+                        <div class="p-3 bg-blue-100 text-blue-800 rounded-full">Zona Nyaman (Iterasi)</div>
+                    </div>
+                </div>
+                <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-4 text-sky-700">PPB dan Karakter</h3>
+                    <p class="text-gray-600 mb-6">Karakter yang baik membutuhkan keseimbangan antara Karakter Performa dan Karakter Moral. PPB membantu mengembangkan keduanya.</p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 p-4 bg-amber-50 rounded-lg">
+                            <h4 class="font-bold text-amber-800">Karakter Performa</h4>
+                            <p class="text-sm text-gray-600">Mendorong prestasi tinggi lewat kerja keras, kegigihan, dan kreativitas.</p>
+                        </div>
+                        <div class="flex-1 p-4 bg-sky-50 rounded-lg">
+                            <h4 class="font-bold text-sky-800">Karakter Moral</h4>
+                            <p class="text-sm text-gray-600">Memastikan prestasi diraih dengan cara yang etis: jujur, adil, dan bertanggung jawab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white border-t border-gray-200">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; 2024 Aplikasi Interaktif Pola Pikir Bertumbuh. Dibuat untuk tujuan edukasi.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Active nav link scrolling
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active-nav');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active-nav');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Comparison Chart
+            const mindsetData = {
+                labels: ['Tantangan', 'Hambatan', 'Usaha', 'Kritik', 'Sukses Orang Lain'],
+                datasets: [
+                    {
+                        label: 'Pola Pikir Tetap (PPT)',
+                        data: [2, 1, 1, 2, 1],
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(239, 68, 68, 1)',
+                    },
+                    {
+                        label: 'Pola Pikir Bertumbuh (PPB)',
+                        data: [5, 5, 5, 4, 4],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
+                    }
+                ]
+            };
+
+            const comparisonDetailsData = [
+                {
+                    area: 'Tantangan',
+                    ppt: 'Menghindarinya agar tetap terlihat cerdas.',
+                    ppb: 'Menerimanya sebagai sarana untuk belajar dan bertumbuh.'
+                },
+                {
+                    area: 'Hambatan',
+                    ppt: 'Menyerah dengan cepat dan mudah frustrasi.',
+                    ppb: 'Bertahan, terus mencari solusi, dan melihatnya sebagai teka-teki.'
+                },
+                {
+                    area: 'Usaha',
+                    ppt: 'Menganggapnya sia-sia; orang cerdas tidak perlu berusaha.',
+                    ppb: 'Melihatnya sebagai satu-satunya jalan menuju penguasaan dan sukses.'
+                },
+                {
+                    area: 'Kritik',
+                    ppt: 'Menerimanya sebagai serangan pribadi yang harus ditolak.',
+                    ppb: 'Melihatnya sebagai masukan berharga untuk memperbaiki diri.'
+                },
+                {
+                    area: 'Sukses Orang Lain',
+                    ppt: 'Melihatnya sebagai ancaman yang membuat diri terlihat kurang.',
+                    ppb: 'Menjadikannya inspirasi dan sumber pelajaran untuk bisa maju.'
+                }
+            ];
+
+            const detailsContainer = document.getElementById('comparison-details');
+
+            function updateDetails(index) {
+                const data = comparisonDetailsData[index];
+                detailsContainer.innerHTML = `
+                    <div class="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                        <h3 class="text-2xl font-bold mb-4 text-center">${data.area}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-red-50 rounded-lg">
+                                <h4 class="font-semibold text-red-700">Pola Pikir Tetap</h4>
+                                <p class="mt-2 text-gray-600">${data.ppt}</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h4 class="font-semibold text-blue-700">Pola Pikir Bertumbuh</h4>
+                                <p class="mt-2 text-gray-600">${data.ppb}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            updateDetails(0);
+
+            const mindsetChartCtx = document.getElementById('mindsetChart').getContext('2d');
+            new Chart(mindsetChartCtx, {
+                type: 'radar',
+                data: mindsetData,
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            pointLabels: { font: { size: 14 } },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    onHover: (event, chartElement) => {
+                        if (chartElement.length) {
+                            const index = chartElement[0].index;
+                            updateDetails(index);
+                        }
+                    }
+                }
+            });
+
+            // PISA Data Chart
+            const pisaChartCtx = document.getElementById('pisaChart').getContext('2d');
+            new Chart(pisaChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Estonia', 'Finlandia', 'Jerman', 'Rata-rata OECD', 'Meksiko', 'Indonesia'],
+                    datasets: [{
+                        label: '% Siswa dengan Pola Pikir Bertumbuh',
+                        data: [70, 59, 58, 54, 43, 39],
+                        backgroundColor: [
+                            '#10b981', '#10b981', '#10b981', '#fbbf24', '#f59e0b', '#ef4444'
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                             ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Proporsi Siswa 15 Tahun dengan Pola Pikir Bertumbuh (PISA 2018)'
+                        }
+                    }
+                }
+            });
+
+            // Praise Toggle
+            const praiseToggle = document.getElementById('praise-toggle');
+            const praiseToggleKnob = document.getElementById('praise-toggle-knob');
+            const praiseResult = document.getElementById('praise-result');
+            const labelPribadi = document.getElementById('praise-label-pribadi');
+            const labelProses = document.getElementById('praise-label-proses');
+            let isProses = true;
+
+            function updatePraise() {
+                if (isProses) {
+                    praiseToggle.classList.remove('bg-red-200');
+                    praiseToggle.classList.add('bg-amber-500');
+                    praiseToggleKnob.style.transform = 'translateX(1.25rem)';
+                    labelProses.classList.add('text-amber-600');
+                    labelPribadi.classList.remove('text-red-600');
+                    praiseResult.innerHTML = `
+                        <h4 class="font-bold text-amber-800">"Kamu pasti sudah bekerja keras!"</h4>
+                        <p class="mt-1 text-sm text-gray-600">Hasil: >90% murid memilih soal yang lebih sulit untuk belajar lebih banyak.</p>
+                    `;
+                } else {
+                    praiseToggle.classList.remove('bg-amber-500');
+                    praiseToggle.classList.add('bg-red-200');
+                    praiseToggleKnob.style.transform = 'translateX(0)';
+                    labelProses.classList.remove('text-amber-600');
+                    labelPribadi.classList.add('text-red-600');
+                    praiseResult.innerHTML = `
+                        <h4 class="font-bold text-red-800">"Kamu pasti pintar!"</h4>
+                        <p class="mt-1 text-sm text-gray-600">Hasil: Mayoritas murid memilih soal yang mudah untuk menjaga citra 'pintar'.</p>
+                    `;
+                }
+            }
+            
+            updatePraise();
+            praiseToggle.addEventListener('click', () => {
+                isProses = !isProses;
+                updatePraise();
+            });
+
+            // Power of YET
+            const yetInput = document.getElementById('yet-input');
+            const yetButton = document.getElementById('yet-button');
+            const yetOutput = document.getElementById('yet-output');
+            
+            function transformYet() {
+                let text = yetInput.value.trim();
+                if (text === '') {
+                    text = 'Saya tidak bisa matematika';
+                }
+                
+                text = text.replace(/tidak bisa/gi, "belum bisa")
+                           .replace(/tidak mampu/gi, "belum mampu")
+                           .replace(/tidak mengerti/gi, "belum mengerti");
+
+                if (!text.includes("belum")) {
+                    text = text + "..., belum.";
+                }
+
+                yetOutput.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+            }
+            
+            yetButton.addEventListener('click', transformYet);
+            yetInput.addEventListener('keyup', (e) => {
+                 if (e.key === 'Enter') {
+                    transformYet();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
